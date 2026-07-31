@@ -1,0 +1,72 @@
+{
+  "config": {
+    "n_samples": 1000,
+    "img_size": 256,
+    "seed": 42,
+    "test_fraction": 0.2,
+    "class_weights": {
+      "good": 0.24,
+      "scratch": 0.19,
+      "crack": 0.19,
+      "dent": 0.19,
+      "corrosion": 0.19
+    },
+    "min_severity": 0.18,
+    "max_severity": 1.0,
+    "borderline_fraction": 0.2,
+    "base_gray_mean": [
+      120,
+      175
+    ],
+    "brushed_strength": [
+      4,
+      12
+    ],
+    "vignette_strength": [
+      0.12,
+      0.35
+    ],
+    "sensor_noise_sigma": [
+      1.2,
+      5.5
+    ],
+    "add_dust_prob": 0.5,
+    "multi_defect_prob": 0.18
+  },
+  "classes": [
+    "good",
+    "scratch",
+    "crack",
+    "dent",
+    "corrosion"
+  ],
+  "counts": {
+    "total": 1000,
+    "train": 800,
+    "test": 200,
+    "per_class": {
+      "good": {
+        "train": 192,
+        "test": 48
+      },
+      "scratch": {
+        "train": 152,
+        "test": 38
+      },
+      "crack": {
+        "train": 152,
+        "test": 38
+      },
+      "dent": {
+        "train": 152,
+        "test": 38
+      },
+      "corrosion": {
+        "train": 152,
+        "test": 38
+      }
+    }
+  },
+  "elapsed_sec": 9.77,
+  "generated_at": "2026-07-31 16:12:14"
+}

@@ -1,0 +1,93 @@
+{
+  "n_test": 200,
+  "detection": {
+    "ml": {
+      "accuracy": 0.965,
+      "precision": 1.0,
+      "recall": 0.9539,
+      "f1": 0.9764,
+      "tp": 145,
+      "tn": 48,
+      "fp": 0,
+      "fn": 7
+    },
+    "fuzzy": {
+      "accuracy": 0.815,
+      "precision": 0.8528,
+      "recall": 0.9145,
+      "f1": 0.8825,
+      "tp": 139,
+      "tn": 24,
+      "fp": 24,
+      "fn": 13
+    },
+    "fused": {
+      "accuracy": 0.97,
+      "precision": 1.0,
+      "recall": 0.9605,
+      "f1": 0.9799,
+      "tp": 146,
+      "tn": 48,
+      "fp": 0,
+      "fn": 6
+    }
+  },
+  "borderline_recall": {
+    "ml": 0.8387,
+    "fuzzy": 0.7742,
+    "fused": 0.871
+  },
+  "n_borderline": 31,
+  "type_accuracy": {
+    "ml": 0.9276,
+    "fused": 0.9013
+  },
+  "fused_confusion_matrix": {
+    "labels": [
+      "good",
+      "scratch",
+      "crack",
+      "dent",
+      "corrosion"
+    ],
+    "matrix": [
+      [
+        48,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        34,
+        0,
+        1,
+        0
+      ],
+      [
+        1,
+        1,
+        35,
+        0,
+        1
+      ],
+      [
+        2,
+        1,
+        0,
+        35,
+        0
+      ],
+      [
+        0,
+        0,
+        5,
+        0,
+        33
+      ]
+    ]
+  },
+  "review_flagged": 42,
+  "path_disagreements": 38
+}

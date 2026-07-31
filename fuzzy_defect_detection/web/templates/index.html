@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#EFF1F2" />
+<title>NeuraFuzz Inspect — hybrid surface defect inspection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+
+<!-- ============================ INTRO LAYER ============================ -->
+<div id="introLayer">
+  <canvas id="introCanvas"></canvas>
+  <div id="introReticles"></div>
+  <div id="introSlate">
+    <div id="introSlateCode"></div>
+    <div id="introSlateLine"></div>
+  </div>
+  <div id="introTitle">NeuraFuzz Inspect</div>
+  <button id="introSkip">Skip</button>
+  <div id="introBar"></div>
+</div>
+
+<div class="shell">
+
+  <!-- ============================== HEADER ============================== -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M12 22V12M3 7l9 5 9-5"/>
+        </svg>
+      </div>
+      <div class="brand-txt">
+        <h1>NeuraFuzz Inspect</h1>
+        <p>hybrid machine-learning + fuzzy-logic surface inspection</p>
+      </div>
+    </div>
+    <div class="sysmeta" id="sysmeta">
+      <div class="sysmeta-item"><span class="k">Model</span><span class="v" id="mMdl">—</span></div>
+      <div class="sysmeta-item"><span class="k">Accuracy</span><span class="v" id="mAcc">—</span></div>
+      <div class="sysmeta-item"><span class="k">ROC-AUC</span><span class="v" id="mAuc">—</span></div>
+      <div class="sysmeta-item live"><span class="dot"></span><span id="engineState">Engine ready</span></div>
+    </div>
+  </header>
+
+  <main class="grid">
+
+    <!-- ============================ INTAKE ============================ -->
+    <aside class="col-left">
+
+      <section class="panel reveal">
+        <h2><span class="step-num">1</span> Specimen intake</h2>
+        <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Choose an image to inspect">
+          <div class="dz-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M12 16V3"/><path d="M7 8l5-5 5 5"/>
+            </svg>
+          </div>
+          <p class="dz-title">Drop a component image</p>
+          <p class="dz-sub">or click to browse · png jpg bmp tiff · max 16 mb</p>
+          <input type="file" id="fileInput" accept="image/*" hidden />
+        </div>
+        <div id="previewWrap" class="preview" hidden>
+          <img id="previewImg" alt="Selected specimen"/>
+          <div class="filetag"><span id="fileName">—</span><span id="fileSize"></span></div>
+          <button class="btn ghost sm block" id="clearBtn">Clear specimen</button>
+        </div>
+        <button class="btn primary block" id="analyzeBtn" disabled>Run inspection</button>
+      </section>
+
+      <section class="panel reveal" style="--d:.06s">
+        <h2><span class="step-num">2</span> Reference library<span class="h2-note" id="sampleCount"></span></h2>
+        <div class="samples" id="samples"><p class="muted sm">Loading…</p></div>
+      </section>
+
+      <section class="panel reveal" style="--d:.12s">
+        <h2>Method</h2>
+        <div class="how-row"><span class="chip ml">ML</span><span>Trained ensemble returns P(defect) and a class.</span></div>
+        <div class="how-row"><span class="chip fz">Fuzzy</span><span>Mamdani rules infer severity and type from measured features.</span></div>
+        <div class="how-row"><span class="chip fu">Fused</span><span>Weighted fusion with a safety bias produces the verdict.</span></div>
+      </section>
+    </aside>
+
+    <!-- ============================ REPORT ============================ -->
+    <section class="col-right">
+
+      <!-- ---------- running ---------- -->
+      <section class="panel progress-panel" id="progressPanel" hidden>
+        <h2>Inspection in progress</h2>
+        <div class="progress-head">
+          <p class="muted sm" id="progressMsg">Starting…</p>
+          <span class="progress-pct" id="progressPct">0%</span>
+        </div>
+        <div class="progress"><div class="bar" id="bar"></div></div>
+        <div class="ladder" id="stagetrack"><div class="ladder-fill" id="ladderFill"></div></div>
+      </section>
+
+      <!-- ---------- idle ---------- -->
+      <section class="panel empty" id="emptyState">
+        <div class="empty-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+            <circle cx="10.5" cy="10.5" r="7.5"/><path d="M16 16l5.5 5.5"/><path d="M7 10.5h7M10.5 7v7"/>
+          </svg>
+        </div>
+        <h2>No specimen loaded</h2>
+        <p class="muted">Drop an image or pick one from the reference library. Every specimen runs
+          through the image-processing and fuzzy-inference pipeline and the trained model at the
+          same time; the two verdicts are then fused into one decision you can audit line by line.</p>
+      </section>
+
+      <!-- ---------- failed ---------- -->
+      <section class="panel error" id="errorState" hidden>
+        <h2>Inspection failed</h2>
+        <p id="errorMsg"></p>
+      </section>
+
+      <!-- ============================ RESULTS ============================ -->
+      <div id="results" hidden>
+
+        <!-- verdict plate -->
+        <section class="panel verdict" id="verdictPanel">
+          <div class="verdict-top">
+            <div class="verdict-left">
+              <p class="verdict-tag" id="verdictTag">—</p>
+              <div class="verdict-type" id="verdictType">—</div>
+              <div class="verdict-meta" id="verdictMeta">—</div>
+              <div class="badges" id="verdictBadges"></div>
+            </div>
+            <div class="confblock">
+              <div class="k">Confidence</div>
+              <div class="v"><span id="confVal">0</span><i>%</i></div>
+              <div class="confmeter"><i id="confMeter"></i></div>
+            </div>
+          </div>
+
+          <!-- SIGNATURE: severity ruler -->
+          <div class="gauge">
+            <div class="gauge-head"><span>Severity scale</span><span id="gaugeBandLabel">—</span></div>
+            <div class="gauge-scale">
+              <div class="gauge-track"></div>
+              <div class="gauge-bands">
+                <span class="band b-none"  style="left:0;width:22%"><i>none</i></span>
+                <span class="band b-minor" style="left:22%;width:23%"><i>minor</i></span>
+                <span class="band b-mod"   style="left:45%;width:23%"><i>moderate</i></span>
+                <span class="band b-sev"   style="left:68%;width:32%"><i>severe</i></span>
+              </div>
+              <div class="gauge-fill" id="gaugeFill"></div>
+              <div class="gauge-needle" id="gaugeNeedle"><b id="sevVal">0</b></div>
+            </div>
+            <div class="gauge-endcaps"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+          </div>
+        </section>
+
+        <!-- consensus axis -->
+        <section class="panel consensus reveal">
+          <h2>Decision consensus<span class="h2-note" id="agreeNote"></span></h2>
+          <div class="axis" id="consAxis">
+            <div class="axis-zone pass" id="zonePass"><b>pass</b></div>
+            <div class="axis-zone fail" id="zoneFail"><b>flag</b></div>
+            <div class="axis-rule"></div>
+            <div class="axis-thresh" id="consThresh"><span id="threshLbl">threshold</span></div>
+            <div class="mark ml" id="markMl"><span class="stem"></span><span class="dot"></span><span class="lbl"><b>ML</b><em id="markMlV">—</em></span></div>
+            <div class="mark fz" id="markFz"><span class="stem"></span><span class="dot"></span><span class="lbl"><b>Fuzzy</b><em id="markFzV">—</em></span></div>
+            <div class="mark fu" id="markFu"><span class="stem"></span><span class="dot"></span><span class="lbl"><b>Fused</b><em id="markFuV">—</em></span></div>
+            <div class="spread-bracket" id="spreadBracket" hidden><span id="spreadLbl"></span></div>
+            <div class="axis-scale"><span>0.00</span><span>0.25</span><span>0.50</span><span>0.75</span><span>1.00</span></div>
+          </div>
+          <div class="consensus-foot" id="consensusFoot"></div>
+        </section>
+
+        <!-- raking-light booth -->
+        <div class="booth reveal">
+          <div class="booth-bar"><span class="lamp"></span><span>Raking-light booth</span><span class="hint">drag to orbit the specimen</span></div>
+          <div class="stage-wrap">
+            <canvas id="stageCanvas"></canvas>
+            <div id="stageReticles"></div>
+          </div>
+        </div>
+
+        <!-- evidence -->
+        <section class="panel reveal">
+          <div class="tabs" id="tabs">
+            <button class="tab active" data-tab="overview">Evidence</button>
+            <button class="tab" data-tab="pipeline">Preprocessing</button>
+            <button class="tab" data-tab="detection">Detection</button>
+            <button class="tab" data-tab="ml">Model</button>
+            <button class="tab" data-tab="fuzzy">Fuzzy rules</button>
+            <button class="tab" data-tab="fusion">Fusion</button>
+            <button class="tab" data-tab="features">Features</button>
+            <span class="tab-ink" id="tabInk"></span>
+          </div>
+
+          <div class="tab-panel active" data-panel="overview">
+            <div class="wipe" id="wipe">
+              <img id="imgOriginal" alt="As received"/>
+              <div class="after-clip" id="wipeClip"><img id="imgOverlay" alt="Annotated indications"/></div>
+              <span class="wipe-tag l">as received</span>
+              <span class="wipe-tag r">indications</span>
+              <div class="wipe-handle" id="wipeHandle" role="slider" tabindex="0"
+                   aria-label="Compare as-received against annotated" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"></div>
+            </div>
+            <div class="explain" id="explanation"></div>
+            <div class="timings" id="timings"></div>
+          </div>
+
+          <div class="tab-panel" data-panel="pipeline"><img id="imgStages" class="fig w" alt="Preprocessing stages"/></div>
+          <div class="tab-panel" data-panel="detection"><img id="imgDetection" class="fig w" alt="Detection panel"/></div>
+          <div class="tab-panel" data-panel="ml">
+            <img id="imgMlProba" class="fig w" alt="Model class probabilities"/>
+            <div class="table-wrap"><table id="mlTable"></table></div>
+          </div>
+          <div class="tab-panel" data-panel="fuzzy"><img id="imgMembership" class="fig w" alt="Fuzzy membership functions"/></div>
+          <div class="tab-panel" data-panel="fusion">
+            <img id="imgFusion" class="fig w" alt="Fusion breakdown"/>
+            <div class="card-inset" id="fusionBox"></div>
+          </div>
+          <div class="tab-panel" data-panel="features">
+            <div class="table-wrap"><table id="featTable"></table></div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">Automated image-processing system using fuzzy logic and machine learning for defect detection</footer>
+</div>
+
+<script src="{{ url_for('static', filename='js/nf-gl.js') }}"></script>
+<script src="{{ url_for('static', filename='js/nf-intro.js') }}"></script>
+<script src="{{ url_for('static', filename='js/nf-stage.js') }}"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

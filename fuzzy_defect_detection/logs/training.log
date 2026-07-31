@@ -1,0 +1,65 @@
+16:13:46 | INFO | ========================================================================
+16:13:46 | INFO | STAGE 1/10 — Loading dataset manifest and label CSVs
+16:13:46 | INFO | ========================================================================
+16:13:46 | INFO | train=800  test=200  classes=['good', 'scratch', 'crack', 'dent', 'corrosion']
+16:13:46 | INFO | ========================================================================
+16:13:46 | INFO | STAGE 2/10 — Extracting 51-D feature vectors (with caching)
+16:13:46 | INFO | ========================================================================
+16:13:46 | INFO | Loaded cached feature matrices.
+16:13:46 | INFO | ========================================================================
+16:13:46 | INFO | STAGE 3/10 — Assembling label vectors
+16:13:46 | INFO | ========================================================================
+16:13:46 | INFO | X_train=(800, 58)  X_test=(200, 58)
+16:13:46 | INFO | class balance (train): good=192, scratch=152, crack=152, dent=152, corrosion=152
+16:13:46 | INFO | ========================================================================
+16:13:46 | INFO | STAGE 4/10 — Building candidate model pipelines
+16:13:46 | INFO | ========================================================================
+16:13:46 | INFO | Candidates: RandomForest, GradientBoosting, (+ Voting ensemble)
+16:13:46 | INFO | ========================================================================
+16:13:46 | INFO | STAGE 5/10 — Stratified 5-fold cross-validation (baseline)
+16:13:46 | INFO | ========================================================================
+16:13:48 | INFO |   RandomForest       CV macro-F1 = 0.9214 ± 0.0049
+16:13:56 | INFO |   GradientBoosting   CV macro-F1 = 0.9335 ± 0.0108
+16:13:56 | INFO | ========================================================================
+16:13:56 | INFO | STAGE 6/10 — Randomised hyper-parameter search
+16:13:56 | INFO | ========================================================================
+16:13:56 | INFO |   searching RandomForest …
+16:14:33 | INFO |   best RF macro-F1=0.9322 params={'clf__n_estimators': 400, 'clf__min_samples_leaf': 2, 'clf__max_features': 'sqrt', 'clf__max_depth': 18}
+16:14:33 | INFO |   searching GradientBoosting …
+16:16:37 | INFO |   best GB macro-F1=0.9375 params={'clf__subsample': 0.8, 'clf__n_estimators': 350, 'clf__max_depth': 4, 'clf__learning_rate': 0.1}
+16:16:57 | INFO |   Voting ensemble CV macro-F1 = 0.9366 ± 0.0092
+16:16:57 | INFO |   -> selected: GradientBoosting (CV macro-F1=0.9375)
+16:16:57 | INFO | ========================================================================
+16:16:57 | INFO | STAGE 7/10 — Refitting best estimator on full training set
+16:16:57 | INFO | ========================================================================
+16:17:18 | INFO |   refit complete.
+16:17:18 | INFO | ========================================================================
+16:17:18 | INFO | STAGE 8/10 — Held-out TEST-set evaluation
+16:17:18 | INFO | ========================================================================
+16:17:18 | INFO |   TEST accuracy = 0.9100
+16:17:18 | INFO |   TEST macro-F1 = 0.9102
+16:17:18 | INFO |   DEFECT-detection  acc=0.955 recall=0.9408 f1=0.9695 auc=0.9903
+16:17:18 | INFO |     good       P=0.842 R=1.000 F1=0.914 n=48
+16:17:18 | INFO |     scratch    P=1.000 R=0.842 F1=0.914 n=38
+16:17:18 | INFO |     crack      P=0.818 R=0.947 F1=0.878 n=38
+16:17:18 | INFO |     dent       P=1.000 R=0.921 F1=0.959 n=38
+16:17:18 | INFO |     corrosion  P=0.969 R=0.816 F1=0.886 n=38
+16:17:18 | INFO | ========================================================================
+16:17:18 | INFO | STAGE 9/10 — Calibrating probabilities for trustworthy fusion
+16:17:18 | INFO | ========================================================================
+16:18:00 | INFO |   calibrated with method='isotonic'
+16:18:00 | INFO |   CALIBRATED test accuracy = 0.935
+16:18:00 | INFO | ========================================================================
+16:18:00 | INFO | STAGE 10/10 — Persisting model bundle, metrics and plots
+16:18:00 | INFO | ========================================================================
+16:18:00 | INFO |   saved model -> C:\Users\aashi\Downloads\workspace-019fb790-f09b-7675-936f-f80062fefc7e\fuzzy_defect_detection\src\..\models\defect_model.joblib
+16:18:00 | INFO |   saved metrics -> models/training_metrics.json
+16:18:01 | INFO |   saved plots -> models/confusion_matrix.png, feature_importance.png
+16:18:01 | INFO | ========================================================================
+16:18:01 | INFO | TRAINING COMPLETE
+16:18:01 | INFO | ========================================================================
+16:18:01 | INFO |   selected model : GradientBoosting
+16:18:01 | INFO |   TEST accuracy  : 0.91
+16:18:01 | INFO |   TEST macro-F1  : 0.9102
+16:18:01 | INFO |   defect recall  : 0.9408
+16:18:01 | INFO |   total time     : 254.6s

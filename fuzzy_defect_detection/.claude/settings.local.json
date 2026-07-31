@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /Users/dev/workspace-c72ca721)",
+      "Bash(find /Users/dev/workspace-c72ca721 -maxdepth 3 -not -path '*/node_modules/*' -not -path '*/.git/*' | head -100)"
+    ]
+  }
+}
